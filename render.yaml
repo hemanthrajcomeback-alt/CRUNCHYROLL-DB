@@ -1,0 +1,14 @@
+services:
+  - type: worker
+    name: crunchyroll-bot
+    env: python
+    plan: starter_plus # This plan provides 1GB of RAM.
+    buildCommand: |
+      pip install -r crunchyroll_bot/requirements.txt
+      playwright install --with-deps
+    startCommand: "python crunchyroll_bot/bot.py"
+    envVars:
+      - key: TELEGRAM_TOKEN
+        sync: false # Set the token in the Render dashboard
+      - key: CRUNCHYROLL_COOKIES_FILE
+        sync: false # Set the path to your cookies file in the Render dashboard

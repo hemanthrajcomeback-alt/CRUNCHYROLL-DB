@@ -39,3 +39,14 @@ python crunchyroll_bot/bot.py
 3.  Send a link to a Crunchyroll series.
 4.  The bot will reply with a list of episodes.
 5.  Click on the episode you want to download.
+
+## Deployment on Render
+
+This project is configured for deployment on [Render](https://render.com/).
+
+1.  Fork this repository to your GitHub account.
+2.  Go to the Render dashboard and create a new **Blueprint Instance**.
+3.  Connect your GitHub account and select the forked repository.
+4.  Render will automatically detect the `render.yaml` file and configure the service.
+5.  In the **Environment** section, add your `TELEGRAM_TOKEN` and `CRUNCHYROLL_COOKIES_FILE` as environment variables.
+6.  Click **Create New Blueprint Instance** to deploy the bot.
