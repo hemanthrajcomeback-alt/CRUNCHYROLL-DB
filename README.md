@@ -4,33 +4,20 @@ This is a Telegram bot that can download videos from Crunchyroll.
 
 ## Setup
 
-1.  **Clone the repository:**
+This project is designed to be run with Docker.
+
+1.  **Build the Docker image:**
     ```bash
-    git clone https://github.com/your-username/crunchyroll-telegram-bot.git
-    cd crunchyroll-telegram-bot
+    docker build -t crunchyroll-bot .
     ```
 
-2.  **Install dependencies:**
+2.  **Run the Docker container:**
     ```bash
-    pip install -r crunchyroll_bot/requirements.txt
+    docker run -it --rm \
+        -e TELEGRAM_TOKEN=<your_telegram_token> \
+        -e CRUNCHYROLL_COOKIES_FILE=<path_to_your_cookies_file> \
+        crunchyroll-bot
     ```
-
-3.  **Install Playwright browsers:**
-    ```bash
-    playwright install
-    ```
-
-4.  **Configure the bot:**
-    -   Rename `.env.example` to `.env`.
-    -   Open `.env` and add your Telegram bot token.
-    -   (Optional) If you have a Crunchyroll premium account, you can add the path to your cookies file to enable downloading premium content.
-
-## Running the Bot
-
-To start the bot, run the following command:
-```bash
-python crunchyroll_bot/bot.py
-```
 
 ## Usage
 

@@ -5,12 +5,10 @@ import asyncio
 import re
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import Application, CommandHandler, CallbackQueryHandler, MessageHandler, filters, ContextTypes
-from utils import fetch_episodes
+from .utils import fetch_episodes
+from .config import settings
 import streamlink
 import subprocess
-from dotenv import load_dotenv
-
-load_dotenv()
 
 # Set up logging
 logging.basicConfig(
@@ -18,10 +16,6 @@ logging.basicConfig(
     level=logging.INFO
 )
 logger = logging.getLogger(__name__)
-
-# Environment variables
-TELEGRAM_TOKEN = os.getenv('TELEGRAM_TOKEN')
-CRUNCHYROLL_COOKIES_FILE = os.getenv('CRUNCHYROLL_COOKIES_FILE')
 
 def sanitize_filename(filename):
     """
@@ -104,8 +98,8 @@ async def button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
             # Run streamlink in a subprocess
             command = ['streamlink', episode_url, 'best', '-o', filename]
-            if CRUNCHYROLL_COOKIES_FILE:
-                command.extend(['--crunchyroll-cookies', CRUNCHYROLL_COOKIES_FILE])
+            if settings.CRUNCHYROLL_COOKIES_FILE:
+                command.extend(['--crunchyroll-cookies', settings.CRUNCHYROLL_COOKIES_FILE])
 
             process = await asyncio.create_subprocess_exec(
                 *command,
@@ -139,17 +133,14 @@ async def button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 
 def main():
-    if not TELEGRAM_TOKEN:
+    if not settings.TELEGRAM_TOKEN:
         logger.error("TELEGRAM_TOKEN environment variable not set!")
         return
 
-    application = Application.builder().token(TELEGRAM_TOKEN).build()
+    application = Application.builder().token(settings.TELEGRAM_TOKEN).build()
 
     application.add_handler(CommandHandler('start', start))
     application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, search))
     application.add_handler(CallbackQueryHandler(button_handler))
 
     application.run_polling()
-
-if __name__ == '__main__':
-    main()
