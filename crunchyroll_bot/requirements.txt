@@ -1,0 +1,6 @@
+python-telegram-bot
+aiohttp
+beautifulsoup4
+streamlink
+playwright
+python-dotenv
