@@ -9,8 +9,8 @@ async def get_episodes(series_url):
         "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)"
     }
     async with aiohttp.ClientSession() as session:
-        async with session.get(series_url, headers=headers) as response:
-            text = await response.text()
+        async with session.get(series_url, headers=headers) as r:
+            text = await r.text()
             soup = BeautifulSoup(text, "html.parser")
 
             episodes = []

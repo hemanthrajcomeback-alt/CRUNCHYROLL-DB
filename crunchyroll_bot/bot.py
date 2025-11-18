@@ -31,11 +31,10 @@ async def series(update: Update, context: ContextTypes.DEFAULT_TYPE):
             await update.message.reply_text("❌ No episodes found or URL is invalid.")
             return
 
-        context.chat_data['episodes'] = episodes
         # Display first 10 episodes
         keyboard = [
-            [InlineKeyboardButton(f"{title}", callback_data=f"ep|{i}")]
-            for i, (title, ep_url) in enumerate(episodes[:10])
+            [InlineKeyboardButton(f"{title}", callback_data=f"ep|{ep_url}")]
+            for title, ep_url in episodes[:10]
         ]
         reply_markup = InlineKeyboardMarkup(keyboard)
         await update.message.reply_text("Select an episode:", reply_markup=reply_markup)
@@ -50,35 +49,20 @@ async def button_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
     data = query.data
 
     if data.startswith("ep|"):
-        ep_index = int(data.split("|")[1])
-        episodes = context.chat_data.get('episodes')
-        if not episodes or ep_index >= len(episodes):
-            await query.edit_message_text("❌ Error: Episode list not found or index is out of range.")
-            return
-
-        _, ep_url = episodes[ep_index]
-        context.chat_data['selected_episode_url'] = ep_url
-
+        ep_url = data.split("|")[1]
         # Ask for quality
         keyboard = [
-            [InlineKeyboardButton("480p", callback_data=f"dl|480p")],
-            [InlineKeyboardButton("720p", callback_data=f"dl|720p")],
-            [InlineKeyboardButton("1080p", callback_data=f"dl|1080p")]
+            [InlineKeyboardButton("480p", callback_data=f"dl|{ep_url}|480p")],
+            [InlineKeyboardButton("720p", callback_data=f"dl|{ep_url}|720p")],
+            [InlineKeyboardButton("1080p", callback_data=f"dl|{ep_url}|1080p")]
         ]
         reply_markup = InlineKeyboardMarkup(keyboard)
         await query.edit_message_text("Select quality:", reply_markup=reply_markup)
 
     elif data.startswith("dl|"):
-        quality = data.split("|")[1]
-        ep_url = context.chat_data.get('selected_episode_url')
-        if not ep_url:
-            await query.edit_message_text("❌ Error: Episode URL not found.")
-            return
-
+        _, ep_url, quality = data.split("|")
         await query.edit_message_text(f"⏳ Downloading {quality}...")
-
-        unique_id = uuid.uuid4()
-        filename = f"episode_{query.message.chat_id}_{unique_id}_{quality}.mp4"
+        filename = f"episode_{uuid.uuid4()}_{quality}.mp4"
 
         # Async download
         process = await asyncio.create_subprocess_exec(
@@ -88,7 +72,14 @@ async def button_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
         stdout, stderr = await process.communicate()
 
         if process.returncode != 0:
-            await query.edit_message_text(f"❌ Download failed. \n {stderr.decode()}")
+            await query.edit_message_text("❌ Download failed.")
+            return
+
+        # Check file size
+        file_size = os.path.getsize(filename)
+        if file_size > 50 * 1024 * 1024:  # 50 MB
+            await query.edit_message_text("❌ File is too large to upload to Telegram.")
+            os.remove(filename)
             return
 
         await query.edit_message_text(f"✅ Uploading {quality} to Telegram...")
