@@ -1,10 +1,26 @@
 services:
-  - type: worker
-    name: crunchyroll-bot
-    env: docker
-    plan: starter_plus # This plan provides 1GB of RAM.
+  - name: crunchroll-downloader-bot
+    type: worker          # MUST be worker for Telegram polling bots
+    runtime: docker       # Use your Dockerfile
+    plan: starter         # Or "basic". Free tier does NOT support workers.
+    autoDeploy: true
+
     envVars:
       - key: TELEGRAM_TOKEN
-        sync: false # Set the token in the Render dashboard
+        sync: false       # Secret, added manually in Render dashboard
       - key: CRUNCHYROLL_COOKIES_FILE
-        sync: false # Set the path to your cookies file in the Render dashboard
+        sync: false
+      - key: BOT_OWNER_ID
+        sync: false
+      - key: API_ID
+        sync: false
+      - key: API_HASH
+        sync: false
+      - key: SESSION_STRING
+        sync: false
+
+    # ONLY IF YOU WANT TO OVERRIDE CMD IN DOCKERFILE
+    # else remove this block and keep Dockerfile CMD
+    dockerCommand: "python main.py"
+
+    maxShutdownDelaySeconds: 30
