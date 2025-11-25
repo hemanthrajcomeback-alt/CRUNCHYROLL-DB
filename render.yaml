@@ -1,0 +1,26 @@
+services:
+  - name: crunchroll-downloader-bot
+    type: web
+    runtime: docker
+    plan: free
+    autoDeploy: true
+
+    envVars:
+      - key: TELEGRAM_TOKEN
+        sync: false
+      - key: CRUNCHYROLL_COOKIES_FILE
+        sync: false
+      - key: BOT_OWNER_ID
+        sync: false
+      - key: API_ID
+        sync: false
+      - key: API_HASH
+        sync: false
+      - key: SESSION_STRING
+        sync: false
+      - key: RENDER_EXTERNAL_HOSTNAME
+        sync: false
+
+    dockerCommand: "python webhook.py"
+    healthCheckPath: "/"
+    maxShutdownDelaySeconds: 30
